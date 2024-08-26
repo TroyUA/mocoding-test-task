@@ -1,5 +1,5 @@
-import express from 'express'
-import fileUpload from 'express-fileupload'
+const express = require('express')
+const fileUpload = require('express-fileupload')
 
 const app = express()
 

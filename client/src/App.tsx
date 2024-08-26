@@ -1,6 +1,6 @@
 import './App.css'
-import { UploadForm } from './assets/components/UploadForm'
-import { WaterTemperatureMap } from './assets/components/WaterTemperatureMap'
+import { UploadForm } from './components/UploadForm'
+import { WaterTemperatureMap } from './components/WaterTemperatureMap'
 
 function App() {
   return (
