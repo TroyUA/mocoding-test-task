@@ -1,12 +1,12 @@
 import './App.css'
-import { UploadForm } from './components/UploadForm'
-import { WaterTemperatureMap } from './components/WaterTemperatureMap'
+import { UploadFile } from './components/UploadFile'
+// import { WaterTemperatureMap } from './components/WaterTemperatureMap'
 
 function App() {
   return (
     <>
-      <UploadForm />
-      <WaterTemperatureMap />
+      <UploadFile />
+      {/* <WaterTemperatureMap /> */}
     </>
   )
 }
