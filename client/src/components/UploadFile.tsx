@@ -32,17 +32,13 @@ export function UploadFile() {
       const res = await fetch(`http://localhost:5000${HOST_URL}`, {
         method: 'POST',
         body: formData,
-        // mode: 'no-cors',
       })
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
-      // const text = await res.text()
-      // console.log(text)
 
       const data = await res.json()
-      console.log(data)
 
       setUploaded(data)
     } catch (error) {
@@ -54,7 +50,7 @@ export function UploadFile() {
     filePicker.current?.click()
   }
   return (
-    <>
+    <div className={styles.container}>
       <button onClick={handlePick}>Pick file</button>
       <input
         ref={filePicker}
@@ -81,12 +77,12 @@ export function UploadFile() {
         <div>
           <h2>{uploaded.fileName}</h2>
           <img
+            className={styles.image}
             alt="uploaded"
             src={`http://localhost:5000${uploaded.filePath}`}
-            width={200}
           />
         </div>
       )}
-    </>
+    </div>
   )
 }

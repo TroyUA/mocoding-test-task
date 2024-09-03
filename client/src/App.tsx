@@ -1,4 +1,3 @@
-import './App.css'
 import { UploadFile } from './components/UploadFile'
 // import { WaterTemperatureMap } from './components/WaterTemperatureMap'
 
