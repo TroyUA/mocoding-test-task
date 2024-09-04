@@ -4,9 +4,7 @@ import styles from './UploadFile.module.css'
 const HOST_URL = '/upload'
 
 export function UploadFile() {
-  const [selectedFile, setSelectedFile] = useState<File | null | undefined>(
-    null
-  )
+  const [files, setFiles] = useState<FileList | null | undefined>(null)
   const [uploaded, setUploaded] = useState<{
     fileName: string
     filePath: string
@@ -15,18 +13,19 @@ export function UploadFile() {
   const filePicker = useRef<HTMLInputElement>(null)
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.files)
-    setSelectedFile(e.target.files?.[0])
+    setFiles(e.target.files)
   }
 
   const handleUpload = async () => {
-    if (!selectedFile) {
+    if (!files) {
       alert('Please select a file')
       return
     }
 
     const formData = new FormData()
-    formData.append('file', selectedFile)
+    Array.from(files).forEach((file) => {
+      formData.append('file', file) // 'files' is the field name multer will expect
+    })
 
     try {
       const res = await fetch(`http://localhost:5000${HOST_URL}`, {
@@ -39,7 +38,6 @@ export function UploadFile() {
       }
 
       const data = await res.json()
-
       setUploaded(data)
     } catch (error) {
       console.log(error)
@@ -49,9 +47,9 @@ export function UploadFile() {
   const handlePick = () => {
     filePicker.current?.click()
   }
+
   return (
     <div className={styles.container}>
-      <button onClick={handlePick}>Pick file</button>
       <input
         ref={filePicker}
         type="file"
@@ -59,20 +57,22 @@ export function UploadFile() {
         name="file"
         className={styles.hidden}
         onChange={handleChange}
+        accept=".zip"
+        multiple
       />
-
+      <button onClick={handlePick}>Pick file</button>
       <button onClick={handleUpload}>Upload now!</button>
 
-      {selectedFile && (
-        <ul>
-          <li>Name: {selectedFile.name}</li>
-          <li>Type: {selectedFile.type}</li>
-          <li>Size: {selectedFile.size}</li>
-          <li>
-            LastModifiedDate: {selectedFile.lastModified.toLocaleString()}
-          </li>
-        </ul>
-      )}
+      {files &&
+        !uploaded &&
+        Array.from(files).map((item, index) => (
+          <ul key={index}>
+            <li>Name: {item.name}</li>
+            <li>Type: {item.type}</li>
+            <li>Size: {item.size}</li>
+            <li>LastModifiedDate: {item.lastModified.toLocaleString()}</li>
+          </ul>
+        ))}
       {uploaded && (
         <div>
           <h2>{uploaded.fileName}</h2>

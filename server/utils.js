@@ -2,9 +2,12 @@ const fs = require('fs/promises')
 const { loadImage, createCanvas } = require('canvas')
 const AdmZip = require('adm-zip')
 
-const { BINARY_DIMENSION_X, BINARY_DIMENSION_Y } = require('./constants')
+const {
+  BINARY_DIMENSION_X,
+  BINARY_DIMENSION_Y,
+  RESOLUTION,
+} = require('./constants')
 
-const RESOLUTION = 10
 const WIDTH = BINARY_DIMENSION_X / RESOLUTION
 const HEIGHT = BINARY_DIMENSION_Y / RESOLUTION
 
@@ -46,14 +49,11 @@ async function processImage() {
       .flat()
       .forEach((temperature, index) => {
         if (temperature !== 255) {
-          // Convert the temperature to RGB color
           const [r, g, b] = temperatureToColor(temperature)
 
-          // Update the image pixel data
-          data[index * 4] = r // Red
-          data[index * 4 + 1] = g // Green
-          data[index * 4 + 2] = b // Blue
-          // Alpha (data[index * 4 + 3]) remains unchanged
+          data[index * 4] = r
+          data[index * 4 + 1] = g
+          data[index * 4 + 2] = b
         }
       })
     console.log('Finished processing temperature data.')
@@ -61,7 +61,6 @@ async function processImage() {
     // Apply the modified image data to the canvas
     ctx.putImageData(imageData, 0, 0)
 
-    // Create a write stream for the output image
     const outHandleWrite = await fs.open(
       `${__dirname}/public/images/updated-world-map.jpeg`,
       'w'
@@ -69,7 +68,6 @@ async function processImage() {
     const outStream = outHandleWrite.createWriteStream()
     const jpegStream = canvas.createJPEGStream()
 
-    // Pipe the JPEG stream to the output file
     jpegStream.pipe(outStream)
 
     outStream.on('finish', () => {
