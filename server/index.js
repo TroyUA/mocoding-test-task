@@ -15,7 +15,7 @@ app.post('/upload', upload.array('file'), (req, res) => {
     const files = req.files // Array of files
 
     if (!files || files.length === 0) {
-      return res.status(400).send({ message: 'No file were uploaded.' })
+      return res.status(400).send({ message: 'No files were uploaded.' })
     }
 
     res.status(200).send({

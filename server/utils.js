@@ -1,15 +1,16 @@
-const fs = require('fs/promises')
+const fs = require('fs')
 const { loadImage, createCanvas } = require('canvas')
 const AdmZip = require('adm-zip')
+const unzipper = require('unzipper')
 
 const {
   BINARY_DIMENSION_X,
   BINARY_DIMENSION_Y,
   RESOLUTION,
+  WIDTH,
+  HEIGHT,
 } = require('./constants')
-
-const WIDTH = BINARY_DIMENSION_X / RESOLUTION
-const HEIGHT = BINARY_DIMENSION_Y / RESOLUTION
+const { temperatureToColor } = require('./color')
 
 async function processImage() {
   const canvas = createCanvas(WIDTH, HEIGHT)
@@ -24,8 +25,7 @@ async function processImage() {
   const data = imageData.data
 
   // Create a read stream for the binary temperature data
-  const fileHandleRead = await fs.open(`${__dirname}/extracted/sst.grid`, 'r')
-  const tempStream = fileHandleRead.createReadStream({
+  const tempStream = fs.createReadStream(`${__dirname}/extracted/sst.grid`, {
     highWaterMark: BINARY_DIMENSION_X,
   })
 
@@ -61,11 +61,9 @@ async function processImage() {
     // Apply the modified image data to the canvas
     ctx.putImageData(imageData, 0, 0)
 
-    const outHandleWrite = await fs.open(
-      `${__dirname}/public/images/updated-world-map.jpeg`,
-      'w'
+    const outStream = fs.createWriteStream(
+      `${__dirname}/public/images/updated-world-map.jpeg`
     )
-    const outStream = outHandleWrite.createWriteStream()
     const jpegStream = canvas.createJPEGStream()
 
     jpegStream.pipe(outStream)
@@ -81,58 +79,109 @@ async function processImage() {
   })
 }
 
-function interpolateColor(color1, color2, factor) {
-  return [
-    Math.round(color1[0] + factor * (color2[0] - color1[0])),
-    Math.round(color1[1] + factor * (color2[1] - color1[1])),
-    Math.round(color1[2] + factor * (color2[2] - color1[2])),
-  ]
-}
-
-function temperatureToColor(temperature) {
-  const colorStops = [
-    [0, 0, 255], // Blue (Coldest)
-    [0, 255, 255], // Aqua
-    [0, 255, 0], // Green
-    [255, 255, 0], // Yellow
-    [255, 165, 0], // Orange (Warmest)
-  ]
-
-  const minTemp = 30 // Coldest temperature, adjust as needed
-  const maxTemp = 100 // Warmest temperature, adjust as needed
-
-  // Calculate the range of temperatures and divide into four segments
-  const tempRange = maxTemp - minTemp
-  const segmentSize = tempRange / (colorStops.length - 1)
-
-  // Find which segment the temperature falls into
-  const segmentIndex = Math.floor((temperature - minTemp) / segmentSize)
-
-  // Ensure the segment index stays within bounds
-  const clampedSegmentIndex = Math.max(
-    0,
-    Math.min(segmentIndex, colorStops.length - 2)
-  )
-
-  // Calculate the interpolation factor within the segment
-  const segmentStartTemp = minTemp + clampedSegmentIndex * segmentSize
-  const factor = (temperature - segmentStartTemp) / segmentSize
-
-  // Interpolate between the two colors of the segment
-  const color1 = colorStops[clampedSegmentIndex]
-  const color2 = colorStops[clampedSegmentIndex + 1]
-
-  return interpolateColor(color1, color2, factor)
-}
-
 function extractFile(from, to) {
   const zip = new AdmZip(from)
   const zipEntries = zip.getEntries()
   zipEntries.forEach((entry) => {
-    if (entry.entryName === 'sst.grid') {
+    if (entry.entryName.endsWith('.grid')) {
       zip.extractEntryTo(entry, to, true, true)
     }
   })
 }
 
-module.exports = { processImage, extractFile }
+async function generateJpegFromZippedGrid(zipFilePath) {
+  const canvas = createCanvas(WIDTH, HEIGHT)
+  const ctx = canvas.getContext('2d')
+
+  // Load the world map image onto the canvas
+  const image = await loadImage(`${__dirname}/public/images/empty-map.jpg`)
+  ctx.drawImage(image, 0, 0, WIDTH, HEIGHT)
+
+  // Get the image data from the canvas
+  const imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT)
+  const data = imageData.data
+
+  fs.createReadStream(zipFilePath)
+    .pipe(unzipper.Parse())
+    .on('entry', async (entry) => {
+      const fileName = entry.path
+      const type = entry.type // 'Directory' or 'File'
+      const size = entry.vars.uncompressedSize
+
+      if (
+        type === 'File' &&
+        fileName.endsWith('.grid') &&
+        size === BINARY_DIMENSION_X * BINARY_DIMENSION_Y
+      ) {
+        console.log(`Extracting: ${fileName} (${size} bytes)`)
+
+        let chunkIndex = 0
+        let bufferedData = Buffer.alloc(0)
+        let tempArr = []
+
+        entry.on('data', (chunk) => {
+          bufferedData = Buffer.concat([bufferedData, chunk])
+          while (bufferedData.length >= BINARY_DIMENSION_X) {
+            const chunkToProcess = bufferedData.subarray(0, BINARY_DIMENSION_X)
+            bufferedData = bufferedData.subarray(BINARY_DIMENSION_X)
+            if (chunkIndex % RESOLUTION === 0) {
+              let row = []
+              for (let i = 0; i < chunkToProcess.length; i += RESOLUTION) {
+                row.push(chunkToProcess[i])
+              }
+              tempArr.push(row)
+            }
+            chunkIndex++
+          }
+        })
+        entry.on('end', async () => {
+          tempArr
+            .reverse()
+            .flat()
+            .forEach((temperature, index) => {
+              if (temperature !== 255) {
+                const [r, g, b] = temperatureToColor(temperature)
+
+                data[index * 4] = r
+                data[index * 4 + 1] = g
+                data[index * 4 + 2] = b
+              }
+            })
+          console.log('Finished processing temperature data.')
+
+          // Apply the modified image data to the canvas
+          ctx.putImageData(imageData, 0, 0)
+
+          const outStream = fs.createWriteStream(
+            `${__dirname}/public/images/generated/${
+              fileName.split('.')[0]
+            }.jpeg`
+          )
+          const jpegStream = canvas.createJPEGStream()
+
+          jpegStream.pipe(outStream)
+
+          outStream.on('finish', () => {
+            console.log('The updated JPEG file was saved.')
+          })
+        })
+      } else {
+        entry.autodrain()
+      }
+    })
+    .on('error', (err) => {
+      console.error('Error while extracting ZIP:', err)
+    })
+}
+
+;(async () => {
+  const zipFilePath = 'uploads/sst.grid.zip'
+
+  generateJpegFromZippedGrid(zipFilePath)
+})()
+
+module.exports = {
+  processImage,
+  extractFile,
+  generateJpegFromZippedGrid,
+}

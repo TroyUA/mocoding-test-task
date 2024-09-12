@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
   },
 })
 
-const allowedTypes = ['application/x-zip-compressed']
+const allowedTypes = ['application/x-zip-compressed', 'application/zip']
 const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true)
