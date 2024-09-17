@@ -12,7 +12,8 @@ const storage = multer.diskStorage({
     cb(null, uploadDir)
   },
   filename(req, file, cb) {
-    cb(null, file.originalname)
+    const timestamp = new Date().toISOString().replace(/:/g, '-')
+    cb(null, `${timestamp}-${file.originalname}`)
   },
 })
 

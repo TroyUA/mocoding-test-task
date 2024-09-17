@@ -1,14 +1,13 @@
 import { ChangeEvent, useId, useRef, useState } from 'react'
 import styles from './UploadFile.module.css'
-
-const HOST_URL = '/upload'
+import { GridCardProps } from './GridCard'
+import { WaterTemperatureMap } from './WaterTemperatureMap'
+import UploadedGrids from './UploadedGrids'
+import { SERVER_URL, UPLOAD_PATH } from '../constants'
 
 export function UploadFile() {
   const [files, setFiles] = useState<FileList | null | undefined>(null)
-  const [uploaded, setUploaded] = useState<{
-    fileName: string
-    filePath: string
-  }>()
+  const [uploaded, setUploaded] = useState<GridCardProps[]>([])
   const uploadId = useId()
   const filePicker = useRef<HTMLInputElement>(null)
 
@@ -28,7 +27,7 @@ export function UploadFile() {
     })
 
     try {
-      const res = await fetch(`http://localhost:5000${HOST_URL}`, {
+      const res = await fetch(`${SERVER_URL}${UPLOAD_PATH}`, {
         method: 'POST',
         body: formData,
       })
@@ -37,8 +36,11 @@ export function UploadFile() {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
 
-      const data = await res.json()
-      setUploaded(data)
+      const data = (await res.json()) as {
+        message: string
+        files: GridCardProps[]
+      }
+      setUploaded(data.files)
     } catch (error) {
       console.log(error)
     }
@@ -50,39 +52,30 @@ export function UploadFile() {
 
   return (
     <div className={styles.container}>
-      <input
-        ref={filePicker}
-        type="file"
-        id={uploadId}
-        name="file"
-        className={styles.hidden}
-        onChange={handleChange}
-        accept=".zip"
-        multiple
-      />
-      <button onClick={handlePick}>Pick file</button>
-      <button onClick={handleUpload}>Upload now!</button>
+      <div>
+        <input
+          ref={filePicker}
+          type="file"
+          id={uploadId}
+          name="file"
+          className={styles.hidden}
+          onChange={handleChange}
+          accept=".zip"
+          multiple
+        />
+        <button onClick={handlePick}>Pick file</button>
+        <button onClick={handleUpload}>Upload now!</button>
+      </div>
 
-      {files &&
-        !uploaded &&
-        Array.from(files).map((item, index) => (
-          <ul key={index}>
-            <li>Name: {item.name}</li>
-            <li>Type: {item.type}</li>
-            <li>Size: {item.size}</li>
-            <li>LastModifiedDate: {item.lastModified.toLocaleString()}</li>
-          </ul>
-        ))}
-      {uploaded && (
-        <div>
-          <h2>{uploaded.fileName}</h2>
-          <img
-            className={styles.image}
-            alt="uploaded"
-            src={`http://localhost:5000${uploaded.filePath}`}
-          />
-        </div>
-      )}
+      <UploadedGrids grids={uploaded}></UploadedGrids>
+      <WaterTemperatureMap
+        imgUrl={
+          uploaded.length > 0
+            ? `${SERVER_URL}${uploaded[0].generatedImgPath}`
+            : `${SERVER_URL}/public/images/empty-map.jpg`
+        }
+      />
+      {/* )} */}
     </div>
   )
 }

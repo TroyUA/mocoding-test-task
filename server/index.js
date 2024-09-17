@@ -3,8 +3,8 @@ const cors = require('cors')
 const path = require('path')
 const fs = require('fs')
 
-const { extractFile, processImage } = require('./utils')
 const upload = require('./middleware/file')
+const { generateJpegFromZippedGrid } = require('./utils')
 const app = express()
 
 app.use('/public', express.static(path.join(__dirname, 'public')))
@@ -12,19 +12,28 @@ app.use(cors())
 
 app.post('/upload', upload.array('file'), (req, res) => {
   try {
-    const files = req.files // Array of files
+    const files = req.files
 
     if (!files || files.length === 0) {
       return res.status(400).send({ message: 'No files were uploaded.' })
     }
 
-    res.status(200).send({
-      message: 'Files uploaded successfully!',
-      files: files.map((file) => ({
-        originalName: file.originalname,
-        savedAs: file.filename,
-        size: file.size,
-      })),
+    Promise.allSettled(
+      files.map((file) =>
+        generateJpegFromZippedGrid(
+          path.join(`${__dirname}/uploads`, file.filename)
+        )
+      )
+    ).then((resultArray) => {
+      res.status(200).send({
+        message: 'Files uploaded successfully!',
+        files: files.map((file, index) => ({
+          originalName: file.originalname,
+          savedAs: file.filename,
+          size: file.size,
+          generatedImgPath: resultArray[index]?.value,
+        })),
+      })
     })
   } catch (err) {
     res
@@ -33,30 +42,9 @@ app.post('/upload', upload.array('file'), (req, res) => {
   }
 })
 
-// app.post('/upload', (req, res) => {
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     return res.status(400).send('No files were uploaded.')
-//   }
-
-//   const file = req.files.file
-//   file.mv(`${__dirname}/uploads/${file.name}`, (err) => {
-//     if (err) {
-//       return res.status(500).send(err)
-//     }
-
-//     // extractFile(`${__dirname}/uploads/${file.name}`, `${__dirname}/extracted`)
-//     // processImage()
-
-//     res.json({
-//       fileName: file.name,
-//       filePath: `/public/images/updated-world-map.jpeg`,
-//     })
-//   })
-// })
-
 app.get('/files', (req, res) => {
   try {
-    const baseDirectory = path.join(__dirname, 'public')
+    const baseDirectory = path.join(__dirname, 'public/')
     const fileList = getAllFiles(baseDirectory)
     const relativeFileList = fileList.map((file) =>
       path.relative(baseDirectory, file)
