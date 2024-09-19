@@ -1,3 +1,4 @@
+import { classNames } from '../utils'
 import styles from './GridCard.module.css'
 
 export type GridCardProps = {
@@ -5,14 +6,30 @@ export type GridCardProps = {
   savedAs: string
   size: number
   generatedImgPath: string
+  setSelectedImgPath: React.Dispatch<React.SetStateAction<string>>
+  isSelected: boolean
 }
 
-function GridCard(props: GridCardProps) {
+function GridCard({
+  setSelectedImgPath,
+  generatedImgPath,
+  isSelected,
+  originalName,
+  size,
+  savedAs,
+}: GridCardProps) {
   return (
-    <div className={styles.card}>
-      <h2>{props.originalName}</h2>
-      <p>Size: {props.size} bytes</p>
-    </div>
+    <button
+      tabIndex={0}
+      className={classNames(styles.card, isSelected && styles.selected)}
+      onFocus={() => setSelectedImgPath(generatedImgPath)}
+    >
+      <h2>{originalName}</h2>
+      <p className={styles.savedAs}>
+        Saved as: <br /> {savedAs}
+      </p>
+      <p>Size: {size} bytes</p>
+    </button>
   )
 }
 

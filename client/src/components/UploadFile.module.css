@@ -11,7 +11,33 @@
 .container {
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: stretch;
+  text-align: center;
+  padding: 1rem;
   gap: 0.5rem;
-  padding: 2rem;
+  border: 1px solid lightblue;
+  border-radius: 0.5rem;
+  box-shadow: 0 1rem 2rem -0.75rem rgba(0, 0, 0, 0.25);
+}
+
+.btn {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.btn:hover:not(:disabled) {
+  border-color: #646cff;
+}
+.btn:focus,
+.btn:focus-visible {
+  outline: 1px auto -webkit-focus-ring-color;
+}
+.btn:disabled {
+  outline: none;
+  cursor: auto;
 }

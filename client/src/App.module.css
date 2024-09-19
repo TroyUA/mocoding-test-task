@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 0.5rem;
+  padding: 2rem;
+}
+
+.top {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+  .top {
+    flex-direction: column;
+  }
+}

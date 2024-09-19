@@ -5,6 +5,7 @@ const fs = require('fs')
 
 const upload = require('./middleware/file')
 const { generateJpegFromZippedGrid } = require('./utils')
+const { GENERATED_IMAGES_PATH } = require('./constants')
 const app = express()
 
 app.use('/public', express.static(path.join(__dirname, 'public')))
@@ -44,7 +45,7 @@ app.post('/upload', upload.array('file'), (req, res) => {
 
 app.get('/files', (req, res) => {
   try {
-    const baseDirectory = path.join(__dirname, 'public/')
+    const baseDirectory = path.join(__dirname, GENERATED_IMAGES_PATH)
     const fileList = getAllFiles(baseDirectory)
     const relativeFileList = fileList.map((file) =>
       path.relative(baseDirectory, file)

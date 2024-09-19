@@ -1,13 +1,14 @@
 import { ChangeEvent, useId, useRef, useState } from 'react'
 import styles from './UploadFile.module.css'
-import { GridCardProps } from './GridCard'
-import { WaterTemperatureMap } from './WaterTemperatureMap'
-import UploadedGrids from './UploadedGrids'
 import { SERVER_URL, UPLOAD_PATH } from '../constants'
+import { classNames } from '../utils'
+import { FileInfo, UploadResponse } from '../types'
 
-export function UploadFile() {
+type UploadFileProps = {
+  setUploaded: React.Dispatch<React.SetStateAction<FileInfo[]>>
+}
+export function UploadFile({ setUploaded }: UploadFileProps) {
   const [files, setFiles] = useState<FileList | null | undefined>(null)
-  const [uploaded, setUploaded] = useState<GridCardProps[]>([])
   const uploadId = useId()
   const filePicker = useRef<HTMLInputElement>(null)
 
@@ -36,11 +37,10 @@ export function UploadFile() {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
 
-      const data = (await res.json()) as {
-        message: string
-        files: GridCardProps[]
-      }
-      setUploaded(data.files)
+      const response = (await res.json()) as UploadResponse
+      const data = response.files
+      setUploaded(data)
+      setFiles(null)
     } catch (error) {
       console.log(error)
     }
@@ -52,30 +52,25 @@ export function UploadFile() {
 
   return (
     <div className={styles.container}>
-      <div>
-        <input
-          ref={filePicker}
-          type="file"
-          id={uploadId}
-          name="file"
-          className={styles.hidden}
-          onChange={handleChange}
-          accept=".zip"
-          multiple
-        />
-        <button onClick={handlePick}>Pick file</button>
-        <button onClick={handleUpload}>Upload now!</button>
-      </div>
-
-      <UploadedGrids grids={uploaded}></UploadedGrids>
-      <WaterTemperatureMap
-        imgUrl={
-          uploaded.length > 0
-            ? `${SERVER_URL}${uploaded[0].generatedImgPath}`
-            : `${SERVER_URL}/public/images/empty-map.jpg`
-        }
+      <input
+        ref={filePicker}
+        type="file"
+        id={uploadId}
+        name="file"
+        className={styles.hidden}
+        onChange={handleChange}
+        accept=".zip"
+        multiple
       />
-      {/* )} */}
+      <button className={styles.btn} onClick={handlePick}>
+        Pick zipped grid
+      </button>
+      <button className={styles.btn} onClick={handleUpload} disabled={!files}>
+        Upload
+      </button>
+      <p className={classNames(!files && styles.hidden)}>
+        {files?.length} file(s) selected
+      </p>
     </div>
   )
 }

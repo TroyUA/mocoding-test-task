@@ -1,15 +1,13 @@
-import GridCard, { GridCardProps } from './GridCard'
 import styles from './UploadedGrids.module.css'
 
 type UploadedGridsProps = {
-  grids: GridCardProps[]
+  children: React.ReactNode
 }
 function UploadedGrids(props: UploadedGridsProps) {
   return (
     <div className={styles.container}>
-      {props.grids.map((grid) => (
-        <GridCard {...grid} />
-      ))}
+      <h2>Uploaded grids:</h2>
+      <div className={styles.gridContainer}>{props.children}</div>
     </div>
   )
 }
