@@ -8,10 +8,15 @@
   margin: 0;
 }
 
+.p {
+  padding: 0;
+  margin: 0;
+  align-self: center;
+}
+
 .container {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  /* align-items: stretch; */
   text-align: center;
   padding: 1rem;
   gap: 0.5rem;
@@ -40,4 +45,10 @@
 .btn:disabled {
   outline: none;
   cursor: auto;
+}
+
+@media (max-width: 640px) {
+  .container {
+    flex-direction: column;
+  }
 }

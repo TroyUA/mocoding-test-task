@@ -8,7 +8,7 @@ type UploadFileProps = {
   setUploaded: React.Dispatch<React.SetStateAction<FileInfo[]>>
 }
 export function UploadFile({ setUploaded }: UploadFileProps) {
-  const [files, setFiles] = useState<FileList | null | undefined>(null)
+  const [files, setFiles] = useState<FileList | null>(null)
   const uploadId = useId()
   const filePicker = useRef<HTMLInputElement>(null)
 
@@ -37,9 +37,8 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
 
-      const response = (await res.json()) as UploadResponse
-      const data = response.files
-      setUploaded(data)
+      const { files: fileInfo } = (await res.json()) as UploadResponse
+      setUploaded((prevData) => [...prevData, ...fileInfo])
       setFiles(null)
     } catch (error) {
       console.log(error)
@@ -63,12 +62,12 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
         multiple
       />
       <button className={styles.btn} onClick={handlePick}>
-        Pick zipped grid
+        Pick zipped grid(s)
       </button>
       <button className={styles.btn} onClick={handleUpload} disabled={!files}>
         Upload
       </button>
-      <p className={classNames(!files && styles.hidden)}>
+      <p className={classNames(!files && styles.hidden, styles.p)}>
         {files?.length} file(s) selected
       </p>
     </div>

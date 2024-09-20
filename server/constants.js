@@ -5,6 +5,7 @@ const WIDTH = BINARY_DIMENSION_X / RESOLUTION
 const HEIGHT = BINARY_DIMENSION_Y / RESOLUTION
 
 const GENERATED_IMAGES_PATH = '/public/images/generated/'
+const UPLOAD_PATH = '/uploads'
 
 module.exports = {
   BINARY_DIMENSION_X,
@@ -13,4 +14,5 @@ module.exports = {
   WIDTH,
   HEIGHT,
   GENERATED_IMAGES_PATH,
+  UPLOAD_PATH,
 }

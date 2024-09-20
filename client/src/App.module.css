@@ -8,6 +8,7 @@
 
 .top {
   display: flex;
+  flex-direction: column;
   width: 100%;
   gap: 1rem;
 }
@@ -15,8 +16,5 @@
 @media (max-width: 640px) {
   .container {
     padding: 1rem;
-  }
-  .top {
-    flex-direction: column;
   }
 }

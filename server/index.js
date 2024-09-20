@@ -5,7 +5,7 @@ const fs = require('fs')
 
 const upload = require('./middleware/file')
 const { generateJpegFromZippedGrid } = require('./utils')
-const { GENERATED_IMAGES_PATH } = require('./constants')
+const { GENERATED_IMAGES_PATH, UPLOAD_PATH } = require('./constants')
 const app = express()
 
 app.use('/public', express.static(path.join(__dirname, 'public')))
@@ -45,16 +45,40 @@ app.post('/upload', upload.array('file'), (req, res) => {
 
 app.get('/files', (req, res) => {
   try {
-    const baseDirectory = path.join(__dirname, GENERATED_IMAGES_PATH)
-    const fileList = getAllFiles(baseDirectory)
-    const relativeFileList = fileList.map((file) =>
+    const baseDirectory = path.join(__dirname, UPLOAD_PATH)
+    const uploadedFileList = getAllFiles(baseDirectory)
+    const relativeFileList = uploadedFileList.map((file) =>
       path.relative(baseDirectory, file)
     ) // Optional: Get file paths relative to base directory
-    res.json(relativeFileList)
+    const timeStampLength = new Date().toISOString().length
+    const fileInfo = relativeFileList.map((filename) => {
+      return {
+        originalName: filename.slice(timeStampLength + 1),
+        savedAs: filename,
+        size: fs.statSync(path.join(__dirname, UPLOAD_PATH, filename)).size,
+        generatedImgPath:
+          GENERATED_IMAGES_PATH +
+          path.basename(filename, path.extname(filename)) +
+          '.jpeg',
+      }
+    })
+    res.json(fileInfo)
   } catch (err) {
     res.status(500).json({ error: 'Unable to list files' })
   }
 })
+// app.get('/files', (req, res) => {
+//   try {
+//     const baseDirectory = path.join(__dirname, GENERATED_IMAGES_PATH)
+//     const fileList = getAllFiles(baseDirectory)
+//     const relativeFileList = fileList.map((file) =>
+//       path.relative(baseDirectory, file)
+//     ) // Optional: Get file paths relative to base directory
+//     res.json(relativeFileList)
+//   } catch (err) {
+//     res.status(500).json({ error: 'Unable to list files' })
+//   }
+// })
 
 app.listen(5000, () => console.log('Server started on port 5000'))
 

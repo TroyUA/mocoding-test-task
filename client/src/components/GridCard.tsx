@@ -1,11 +1,8 @@
+import { FileInfo } from '../types'
 import { classNames } from '../utils'
 import styles from './GridCard.module.css'
 
-export type GridCardProps = {
-  originalName: string
-  savedAs: string
-  size: number
-  generatedImgPath: string
+export type GridCardProps = FileInfo & {
   setSelectedImgPath: React.Dispatch<React.SetStateAction<string>>
   isSelected: boolean
 }

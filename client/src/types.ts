@@ -5,7 +5,7 @@ export type UploadResponse = {
 
 export type FileInfo = {
   originalName: string
-  savedAs: string
+  savedAs?: string
   size: number
-  generatedImgPath: string
+  generatedImgPath?: string
 }

@@ -20,8 +20,6 @@ async function initCanvas() {
 
 function generateImage(fileName, canvas, ctx, imageData) {
   return new Promise((resolve, reject) => {
-    console.log('Finished processing temperature data.')
-
     // Apply the modified image data to the canvas
     ctx.putImageData(imageData, 0, 0)
     const imgPath = `${GENERATED_IMAGES_PATH}${fileName}`
