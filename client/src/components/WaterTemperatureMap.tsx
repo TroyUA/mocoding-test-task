@@ -8,7 +8,7 @@ type WaterTemperatureMapProps = {
 export function WaterTemperatureMap(props: WaterTemperatureMapProps) {
   return (
     <div>
-      <img src={`${SERVER_URL}${props.imgPath}`} className={styles.image} />
+      <img src={`${SERVER_URL}/${props.imgPath}`} className={styles.image} />
     </div>
   )
 }

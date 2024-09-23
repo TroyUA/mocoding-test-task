@@ -1,4 +1,4 @@
-function interpolateColor(color1, color2, factor) {
+function interpolateColor(color1: number[], color2: number[], factor: number) {
   return [
     Math.round(color1[0] + factor * (color2[0] - color1[0])),
     Math.round(color1[1] + factor * (color2[1] - color1[1])),
@@ -6,7 +6,7 @@ function interpolateColor(color1, color2, factor) {
   ]
 }
 
-function temperatureToColor(temperature) {
+export function temperatureToColor(temperature: number) {
   const colorStops = [
     [0, 0, 255], // Blue (Coldest)
     [0, 255, 255], // Aqua
@@ -41,5 +41,3 @@ function temperatureToColor(temperature) {
 
   return interpolateColor(color1, color2, factor)
 }
-
-module.exports = { temperatureToColor }

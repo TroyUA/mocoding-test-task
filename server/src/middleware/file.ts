@@ -1,28 +1,34 @@
-const path = require('path')
-const fs = require('fs')
-const multer = require('multer')
+import path from 'path'
+import fs from 'fs'
+import multer from 'multer'
+import { Request } from 'express'
+import { UPLOAD_PATH } from '../utils/constants'
 
-const uploadDir = path.join(__dirname, '../uploads')
+const uploadDir = path.resolve(UPLOAD_PATH)
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true }) // Create the directory if it doesn't exist
 }
 
 const storage = multer.diskStorage({
-  destination(req, file, cb) {
+  destination(_req, _file, cb) {
     cb(null, uploadDir)
   },
-  filename(req, file, cb) {
+  filename(_req, file, cb) {
     const timestamp = new Date().toISOString().replace(/:/g, '-')
     cb(null, `${timestamp}-${file.originalname}`)
   },
 })
 
 const allowedTypes = ['application/x-zip-compressed', 'application/zip']
-const fileFilter = (req, file, cb) => {
+const fileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true)
   } else {
     cb(null, false)
   }
 }
-module.exports = multer({ storage, fileFilter })
+export default multer({ storage, fileFilter })

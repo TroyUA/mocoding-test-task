@@ -28,7 +28,7 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
     })
 
     try {
-      const res = await fetch(`${SERVER_URL}${UPLOAD_PATH}`, {
+      const res = await fetch(`${SERVER_URL}/${UPLOAD_PATH}`, {
         method: 'POST',
         body: formData,
       })
@@ -37,8 +37,8 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
 
-      const { files: fileInfo } = (await res.json()) as UploadResponse
-      setUploaded((prevData) => [...prevData, ...fileInfo])
+      const { files: filesInfo } = (await res.json()) as UploadResponse
+      setUploaded((prevData) => [...prevData, ...filesInfo])
       setFiles(null)
     } catch (error) {
       console.log(error)

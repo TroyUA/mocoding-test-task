@@ -1,16 +1,12 @@
-const fs = require('fs')
-const path = require('path')
-const unzipper = require('unzipper')
+import fs from 'fs'
+import path from 'path'
+import unzipper from 'unzipper'
 
-const {
-  BINARY_DIMENSION_X,
-  BINARY_DIMENSION_Y,
-  RESOLUTION,
-} = require('./constants')
-const { temperatureToColor } = require('./color')
-const { initCanvas, generateImage } = require('./canvas')
+import { BINARY_DIMENSION_X, BINARY_DIMENSION_Y, RESOLUTION } from './constants'
+import { temperatureToColor } from './color'
+import { initCanvas, generateImage } from './canvas'
 
-async function generateJpegFromZippedGrid(zipFilePath) {
+export async function generateJpegFromZippedGrid(zipFilePath: string) {
   const { canvas, ctx, imageData, data } = await initCanvas()
 
   return new Promise((resolve, reject) => {
@@ -30,9 +26,9 @@ async function generateJpegFromZippedGrid(zipFilePath) {
 
           let chunkIndex = 0
           let bufferedData = Buffer.alloc(0)
-          let tempArr = []
+          let tempArr: number[][] = []
 
-          entry.on('data', (chunk) => {
+          entry.on('data', (chunk: Buffer) => {
             bufferedData = Buffer.concat([bufferedData, chunk])
             while (bufferedData.length >= BINARY_DIMENSION_X) {
               const chunkToProcess = bufferedData.subarray(
@@ -87,8 +83,4 @@ async function generateJpegFromZippedGrid(zipFilePath) {
         reject(err)
       })
   })
-}
-
-module.exports = {
-  generateJpegFromZippedGrid,
 }

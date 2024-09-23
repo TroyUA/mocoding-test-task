@@ -1,14 +1,20 @@
-const { createCanvas, loadImage } = require('canvas')
-const { WIDTH, HEIGHT, GENERATED_IMAGES_PATH } = require('./constants')
-const fs = require('fs')
-const path = require('path')
+import {
+  createCanvas,
+  loadImage,
+  Canvas,
+  CanvasRenderingContext2D,
+  ImageData,
+} from 'canvas'
+import { WIDTH, HEIGHT, GENERATED_IMAGES_PATH } from './constants'
+import fs from 'fs'
+import path from 'path'
 
-async function initCanvas() {
+export async function initCanvas() {
   const canvas = createCanvas(WIDTH, HEIGHT)
   const ctx = canvas.getContext('2d')
 
   // Load the world map image onto the canvas
-  const image = await loadImage(`${__dirname}/public/images/empty-map.jpg`)
+  const image = await loadImage(path.resolve(`public/images/empty-map.jpg`))
   ctx.drawImage(image, 0, 0, WIDTH, HEIGHT)
 
   // Get the image data from the canvas
@@ -18,13 +24,16 @@ async function initCanvas() {
   return { ctx, imageData, data, canvas }
 }
 
-function generateImage(fileName, canvas, ctx, imageData) {
+export function generateImage(
+  fileName: string,
+  canvas: Canvas,
+  ctx: CanvasRenderingContext2D,
+  imageData: ImageData
+) {
   return new Promise((resolve, reject) => {
-    // Apply the modified image data to the canvas
     ctx.putImageData(imageData, 0, 0)
-    const imgPath = `${GENERATED_IMAGES_PATH}${fileName}`
-
-    const outStream = fs.createWriteStream(path.join(__dirname, imgPath))
+    const imgPath = path.join(GENERATED_IMAGES_PATH, fileName)
+    const outStream = fs.createWriteStream(path.resolve(imgPath))
     canvas.createJPEGStream().pipe(outStream)
 
     outStream.on('finish', () => {
@@ -36,4 +45,3 @@ function generateImage(fileName, canvas, ctx, imageData) {
     })
   })
 }
-module.exports = { initCanvas, generateImage }
