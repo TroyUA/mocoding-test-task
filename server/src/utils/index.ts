@@ -27,6 +27,8 @@ export async function generateJpegFromZippedGrid(zipFilePath: string) {
           let chunkIndex = 0
           let bufferedData = Buffer.alloc(0)
           let tempArr: number[][] = []
+          let minTemp: number
+          let maxTemp: number
 
           entry.on('data', (chunk: Buffer) => {
             bufferedData = Buffer.concat([bufferedData, chunk])
@@ -40,6 +42,19 @@ export async function generateJpegFromZippedGrid(zipFilePath: string) {
                 let row = []
                 for (let i = 0; i < chunkToProcess.length; i += RESOLUTION) {
                   row.push(chunkToProcess[i])
+                  if (chunkToProcess[i] < 255) {
+                    if (
+                      typeof minTemp === 'undefined' ||
+                      chunkToProcess[i] < minTemp
+                    )
+                      minTemp = chunkToProcess[i]
+
+                    if (
+                      typeof maxTemp === 'undefined' ||
+                      chunkToProcess[i] > maxTemp
+                    )
+                      maxTemp = chunkToProcess[i]
+                  }
                 }
                 tempArr.push(row)
               }
@@ -53,7 +68,11 @@ export async function generateJpegFromZippedGrid(zipFilePath: string) {
               .flat()
               .forEach((temperature, index) => {
                 if (temperature !== 255) {
-                  const [r, g, b] = temperatureToColor(temperature)
+                  const [r, g, b] = temperatureToColor(
+                    temperature,
+                    minTemp,
+                    maxTemp
+                  )
 
                   data[index * 4] = r
                   data[index * 4 + 1] = g

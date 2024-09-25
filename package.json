@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "client": "cd client && pnpm run dev",
-    "server": "nodemon server/index.js",
+    "server": "cd server && pnpm run server",
     "dev": "concurrently \"pnpm run server\" \"pnpm run client\"",
     "install-client": "pnpm --prefix client install",
     "install-server": "pnpm --prefix server install",
