@@ -46,7 +46,7 @@ importers:
         specifier: ^0.10.10
         version: 0.10.10
       chai:
-        specifier: '4'
+        specifier: ^4.5.0
         version: 4.5.0
       mocha:
         specifier: ^10.7.3

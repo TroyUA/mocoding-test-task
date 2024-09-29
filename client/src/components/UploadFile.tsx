@@ -9,7 +9,7 @@ type UploadFileProps = {
 }
 export function UploadFile({ setUploaded }: UploadFileProps) {
   const [files, setFiles] = useState<FileList | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+  const [isUploading, setIsUploading] = useState(true)
   const uploadId = useId()
   const filePicker = useRef<HTMLInputElement>(null)
 
@@ -81,10 +81,16 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
         Upload
       </button>
       <p className={classNames(!files && styles.hidden, styles.p)}>
-        {isUploading
-          ? 'Uploading file(s) and generating temperature map(s)...'
-          : `${files?.length} file(s) selected`}
+        {!isUploading && `${files?.length} file(s) selected`}
       </p>
+      {isUploading && (
+        <div className={styles.fallback}>
+          <span
+            className={styles.loader}
+            style={{ alignSelf: 'center', justifySelf: 'center' }}
+          ></span>
+        </div>
+      )}
     </div>
   )
 }

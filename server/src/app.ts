@@ -6,6 +6,7 @@ import fs from 'fs'
 import upload from './middleware/file'
 import { generateJpegFromZippedGrid } from './utils'
 import { GENERATED_IMAGES_PATH, UPLOAD_PATH } from './utils/constants'
+import { getAllFiles } from './utils/getFiles'
 const app = express()
 
 app.use('/public', express.static(path.resolve('public')))
@@ -71,19 +72,3 @@ app.get('/files', (req, res) => {
 })
 
 app.listen(5000, () => console.log('Server started on port 5000'))
-
-function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) {
-  const files = fs.readdirSync(dirPath)
-
-  files.forEach((file) => {
-    const fullPath = path.join(dirPath, file)
-
-    if (fs.statSync(fullPath).isDirectory()) {
-      arrayOfFiles = getAllFiles(fullPath, arrayOfFiles)
-    } else {
-      arrayOfFiles.push(fullPath)
-    }
-  })
-
-  return arrayOfFiles
-}
