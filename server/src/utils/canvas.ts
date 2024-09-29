@@ -31,6 +31,11 @@ export function generateImage(
   imageData: ImageData
 ) {
   return new Promise((resolve, reject) => {
+    const generatedImagesDir = path.resolve(GENERATED_IMAGES_PATH)
+    if (!fs.existsSync(generatedImagesDir)) {
+      fs.mkdirSync(generatedImagesDir, { recursive: true }) // Create the directory if it doesn't exist
+    }
+
     ctx.putImageData(imageData, 0, 0)
     const imgPath = path.join(GENERATED_IMAGES_PATH, fileName)
     const outStream = fs.createWriteStream(path.resolve(imgPath))

@@ -9,6 +9,7 @@ type UploadFileProps = {
 }
 export function UploadFile({ setUploaded }: UploadFileProps) {
   const [files, setFiles] = useState<FileList | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const uploadId = useId()
   const filePicker = useRef<HTMLInputElement>(null)
 
@@ -21,6 +22,8 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
       alert('Please select a file')
       return
     }
+
+    setIsUploading(true)
 
     const formData = new FormData()
     Array.from(files).forEach((file) => {
@@ -42,6 +45,8 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
       setFiles(null)
     } catch (error) {
       console.log(error)
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -61,14 +66,24 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
         accept=".zip"
         multiple
       />
-      <button className={styles.btn} onClick={handlePick}>
+      <button
+        className={styles.btn}
+        onClick={handlePick}
+        disabled={isUploading}
+      >
         Pick zipped grid(s)
       </button>
-      <button className={styles.btn} onClick={handleUpload} disabled={!files}>
+      <button
+        className={styles.btn}
+        onClick={handleUpload}
+        disabled={!files || isUploading}
+      >
         Upload
       </button>
       <p className={classNames(!files && styles.hidden, styles.p)}>
-        {files?.length} file(s) selected
+        {isUploading
+          ? 'Uploading file(s) and generating temperature map(s)...'
+          : `${files?.length} file(s) selected`}
       </p>
     </div>
   )

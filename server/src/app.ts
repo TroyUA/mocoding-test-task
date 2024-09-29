@@ -21,7 +21,7 @@ app.post('/upload', upload.array('file'), (req, res) => {
 
     Promise.allSettled(
       files.map((file) =>
-        generateJpegFromZippedGrid(path.resolve('uploads', file.filename))
+        generateJpegFromZippedGrid(path.resolve(UPLOAD_PATH, file.filename))
       )
     ).then((resultArray) => {
       res.status(200).send({
