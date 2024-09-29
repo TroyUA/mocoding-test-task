@@ -80,16 +80,15 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
       >
         Upload
       </button>
-      <p className={classNames(!files && styles.hidden, styles.p)}>
-        {!isUploading && `${files?.length} file(s) selected`}
-      </p>
-      {isUploading && (
+
+      {isUploading ? (
         <div className={styles.fallback}>
-          <span
-            className={styles.loader}
-            style={{ alignSelf: 'center', justifySelf: 'center' }}
-          ></span>
+          <span className={styles.loader}></span>
         </div>
+      ) : (
+        <p className={classNames(!files && styles.hidden, styles.p)}>
+          {`${files?.length} file(s) selected`}
+        </p>
       )}
     </div>
   )

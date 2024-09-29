@@ -66,6 +66,9 @@
   height: 40px;
   position: relative;
   display: inline-block;
+  align-self: center;
+  justify-self: center;
+
   --base-color: white; /*use your base color*/
 }
 .loader::before {
