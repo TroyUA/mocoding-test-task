@@ -9,7 +9,7 @@ type UploadFileProps = {
 }
 export function UploadFile({ setUploaded }: UploadFileProps) {
   const [files, setFiles] = useState<FileList | null>(null)
-  const [isUploading, setIsUploading] = useState(true)
+  const [isUploading, setIsUploading] = useState(false)
   const uploadId = useId()
   const filePicker = useRef<HTMLInputElement>(null)
 
