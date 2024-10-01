@@ -18,7 +18,7 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
   }
 
   const handleUpload = async () => {
-    if (!files) {
+    if (!files || files.length === 0) {
       alert('Please select a file')
       return
     }
@@ -76,7 +76,7 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
       <button
         className={styles.btn}
         onClick={handleUpload}
-        disabled={!files || isUploading}
+        disabled={!files || files.length === 0 || isUploading}
       >
         Upload
       </button>
@@ -86,7 +86,12 @@ export function UploadFile({ setUploaded }: UploadFileProps) {
           <span className={styles.loader}></span>
         </div>
       ) : (
-        <p className={classNames(!files && styles.hidden, styles.p)}>
+        <p
+          className={classNames(
+            (!files || files.length === 0) && styles.hidden,
+            styles.p
+          )}
+        >
           {`${files?.length} file(s) selected`}
         </p>
       )}
