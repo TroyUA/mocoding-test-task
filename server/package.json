@@ -24,10 +24,12 @@
     "@types/mocha": "^10.0.8",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.5.5",
+    "@types/sinon": "^17.0.3",
     "@types/unzipper": "^0.10.10",
     "chai": "^4.5.0",
     "mocha": "^10.7.3",
     "nodemon": "^3.1.4",
+    "sinon": "^19.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
   }
